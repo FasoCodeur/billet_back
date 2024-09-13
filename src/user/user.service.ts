@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login.user.dto';
+import { ForgetPassWordDto } from './dto/forgetPassWord.dto';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
 
@@ -22,5 +24,25 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async login(createAuthDto: LoginUserDto) {
+    return `This action login user`;
+  }
+
+  async verifyEmailCode(code: number, email: string) {
+    return Promise.resolve(undefined);
+  }
+
+  async forgetPassword(forgotPassword: ForgetPassWordDto) {
+    return Promise.resolve(undefined);
+  }
+
+  async resetPassword(id: string, oldPassword: string, newPassword: string) {
+    return Promise.resolve(undefined);
+  }
+
+  async refreshToken(user) {
+    return Promise.resolve(undefined);
   }
 }

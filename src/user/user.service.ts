@@ -3,9 +3,20 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login.user.dto';
 import { ForgetPassWordDto } from './dto/forgetPassWord.dto';
+import { User } from './entities/user.entity';
+import { VerifyCodesEntity } from './entities/verify-codes.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(VerifyCodesEntity)
+    private readonly verifyCodeRepository: Repository<VerifyCodesEntity>,
+    // private jwtService: JwtService,
+  ) {}
   async create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }

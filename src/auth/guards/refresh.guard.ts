@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorator/roles.decorator';
-import { variableConfig } from '../../orm.config';
+import * as process from 'node:process';
 
 @Injectable()
 export class RefreshGuard implements  CanActivate{
@@ -26,7 +26,7 @@ export class RefreshGuard implements  CanActivate{
     }
     try {
       request['user'] = await this.jwtService.verify(token, {
-        secret: variableConfig.REFRESH_SECRET,
+        secret: process.env.REFRESH_SECRET,
       });
     } catch {
       throw new UnauthorizedException("Votre jeton d'accès a expiré.");

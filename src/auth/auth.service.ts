@@ -3,6 +3,7 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { ForgetPassWordDto } from '../user/dto/forgetPassWord.dto';
 import { LoginUserDto } from '../user/dto/login.user.dto';
 import { UserService } from '../user/user.service';
+import { generateExpiryTime, generateRandomNumber } from '../utils/utils';
 
 @Injectable()
 export class AuthService {
@@ -24,22 +25,22 @@ export class AuthService {
   }
 
   async sendEmailCode(email: string) {
-    // const verifyEmail = await this.userService.findUserByEmail(email);
-    // if (!verifyEmail){
-    //   throw  new NotFoundException('Cet email n\'existe pas veuillez creer un compte pour pouvoir envoyer un code de verification.')
-    // }
-    // try {
-    //   const emailVerificationCode = generateRandomNumber();
-    //   const emailVerificationCodeExpiry = generateExpiryTime();
-    //   await this.userService.createEmailVerificationCode(
-    //     {
-    //       emailVerificationCode: emailVerificationCode,
-    //       emailVerificationCodeExpiry: emailVerificationCodeExpiry,
-    //     },
-    //     email
-    //   );
-    //   const subject= 'Code de Verification';
-    //   const message = `Votre code verification est: ${emailVerificationCode}`;
+    const verifyEmail = await this.userService.findUserByEmail(email);
+    if (!verifyEmail){
+      throw  new NotFoundException('Cet email n\'existe pas veuillez creer un compte pour pouvoir envoyer un code de verification.')
+    }
+    try {
+      const emailVerificationCode = generateRandomNumber();
+      const emailVerificationCodeExpiry = generateExpiryTime();
+      await this.userService.createEmailVerificationCode(
+        {
+          emailVerificationCode: emailVerificationCode,
+          emailVerificationCodeExpiry: emailVerificationCodeExpiry,
+        },
+        email
+      );
+      const subject= 'Code de Verification';
+      const message = `Votre code verification est: ${emailVerificationCode}`;
     //
     //   // this.sendMail(email, message, subject)
     //   await this.sendGridService.send(email, message, subject);
@@ -47,13 +48,13 @@ export class AuthService {
     //     status: HttpStatus.OK,
     //     message: 'Verification code sent successfully',
     //   };
-    // } catch (error) {
-    //   console.log(error);
-    //   throw new HttpException(
-    //     'Failed to send verification code this email dont exit in our database',
-    //     HttpStatus.INTERNAL_SERVER_ERROR,
-    //   );
-    // }
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        'Failed to send verification code this email dont exit in our database',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async forgetPassword(forgotPassword: ForgetPassWordDto) {

@@ -9,9 +9,9 @@ async function bootstrap() {
   const PORT = process.env.PORT || 3000;
   const config = new DocumentBuilder()
     .setTitle('back for bybus')
-    .setDescription('Vos billet en un click')
+    .setDescription('Vos billets en un click')
     .setVersion('1.0')
-    .addTag('Billit')
+    .addTag('Billet')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document,{

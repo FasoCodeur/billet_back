@@ -10,12 +10,11 @@ import { Response } from 'express'
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  // @Public()
+
   @Post("/register")
   async register(@Body() createAuthDto: CreateUserDto) {
     return await this.authService.create(createAuthDto);
   }
-  // @Public()
   @Post("/login")
   async login(@Body() createAuthDto: LoginUserDto, @Res({passthrough:true}) response:Response) {
     const tokens = await this.authService.login(createAuthDto, response);
@@ -24,8 +23,7 @@ export class AuthController {
     return tokens;
   }
 
-  // @Public()
-  @Post('logout')
+  @Post('/logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('access_token');
     response.clearCookie('refresh_token');

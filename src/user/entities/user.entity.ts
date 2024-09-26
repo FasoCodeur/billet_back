@@ -1,7 +1,8 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { AbstractEntity } from './abstract.entity';
 import { VerifyCodesEntity } from './verify-codes.entity';
 import { UserRole } from './user-role.enum';
+import { Company } from '../../company/entities/company.entity';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -23,9 +24,13 @@ export class User extends AbstractEntity {
 
   @Column({ default: false })
   is_email_verified: boolean;
+
   @OneToOne(
     () => VerifyCodesEntity,
     (verificationCodes) => verificationCodes.user,
   )
   verificationCodes: VerifyCodesEntity;
+
+  @OneToMany(()=>Company, (company) => company.user)
+  company: Company[];
 }

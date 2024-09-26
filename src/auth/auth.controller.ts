@@ -7,7 +7,7 @@ import { ForgetPassWordDto } from '../user/dto/forgetPassWord.dto';
 import { Response } from 'express'
 
 @Controller('auth')
-@ApiTags('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -36,15 +36,22 @@ export class AuthController {
   @Post('refresh')
   @ApiBearerAuth()
   async refresh(@Req() req, @Res({ passthrough: true }) response: Response) {
-    const [type, token] = req.headers['authorization']?.split(' ') || [];
-    if (type ==='Bearer'){
-      const newAccessToken = await this.authService.refresh(token, response);
-      response.cookie('access_token', newAccessToken, { httpOnly: true });
-      response.cookie('refresh_token', newAccessToken.refresh_token, { httpOnly: true });
-      return newAccessToken;
-    }else {
-      throw new BadRequestException('Ce token est incorrecte.');
+    try {
+      const [type, token] = req.headers['authorization']?.split(' ') || [];
+      if (type ==='Bearer'){
+        const newAccessToken = await this.authService.refresh(token, response);
+        response.cookie('access_token', newAccessToken, { httpOnly: true });
+        response.cookie('refresh_token', newAccessToken.refresh_token, { httpOnly: true });
+        return newAccessToken;
+      }else {
+        return {
+          message:'Verify your token type.'
+        }
+      }
+    } catch (err) {
+      throw new BadRequestException('Verify your refresh token.');
     }
+
   }
 
   // @Public()

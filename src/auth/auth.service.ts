@@ -16,8 +16,8 @@ export class AuthService {
   async create(createAuthDto: CreateUserDto) {
     return await this.userService.create(createAuthDto);
   }
-  async login(createAuthDto: LoginUserDto) {
-    return await this.userService.login(createAuthDto)
+  async login(createAuthDto: LoginUserDto,response) {
+    return await this.userService.login(createAuthDto,response)
   }
 
   async verifyEmailWithMakingEmailVerified(code: number, email: string) {
@@ -65,8 +65,8 @@ export class AuthService {
     return await this.userService.resetPassword(id, oldPassword, newPassword);
   }
 
-  async refresh(user) {
-    return await this.userService.refreshToken(user)
+  async refresh(token, response) {
+    return await this.userService.refreshToken(token, response)
   }
 
 

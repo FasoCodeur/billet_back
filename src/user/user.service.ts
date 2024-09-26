@@ -1,4 +1,11 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login.user.dto';
@@ -11,6 +18,7 @@ import { isExpired } from '../utils/utils';
 import * as bcrypt from 'bcrypt';
 import * as process from 'node:process';
 import { JwtService } from '@nestjs/jwt';
+import { Tokens } from './types';
 
 
 @Injectable()
@@ -23,26 +31,34 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
   async create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    const existingUser = await this.findUserByEmailOrPhone(createUserDto.email, createUserDto.phone);
+    if (existingUser) {
+      throw new ConflictException('Vous avez deja un compte.')
+    }
+    createUserDto.password= await bcrypt.hash(createUserDto.password, 12);
+    return await this.userRepository.save(createUserDto);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return await this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    return await this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.verificationCodes', 'verificationCodes')
+      .where('user.id = :id', { id: id })
+      .getOne();
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} user`;
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto,response) {
     const { password, email } = loginUserDto;
 
     const user = await this.userRepository.createQueryBuilder('user')
@@ -64,7 +80,14 @@ export class UserService {
     if (!isMatch) {
       throw new NotFoundException("User password is not correct");
     }
-    const payload = { sub: user.id ,email: user.email, roles: user.role };
+    const payload = { sub: user.id ,email: user.email, phone:user.phone, roles: user.role };
+    const tokens = await this.getTokens(payload);
+    response.cookie('access_token', tokens.access_token, { httpOnly: true })
+    response.cookie('refresh_token', tokens.refresh_token, { httpOnly: true })
+    return tokens;
+  }
+
+  async getTokens(payload): Promise<Tokens> {
     return {
       access_token: await this.jwtService.signAsync(payload, {
         expiresIn:'1d',
@@ -75,6 +98,19 @@ export class UserService {
         secret:process.env.REFRESH_SECRET
       })
     };
+  }
+
+  async refreshToken(refreshToken, response) {
+    const userVerify = this.jwtService.verify(refreshToken, {secret: process.env.REFRESH_SECRET });
+    const user = await this.findUserByEmailOrPhone(userVerify.email, userVerify.phone);
+    if (!user) {
+      throw new BadRequestException("Utilisateur n'existe pas");
+    }
+    const payload = { sub: user.id ,email: user.email, phone:user.phone, roles: user.role };
+    const tokens = await this.getTokens(payload);
+    response.cookie('access_token', tokens.access_token, { httpOnly: true });
+    response.cookie('refresh_token', tokens.refresh_token, { httpOnly: true });
+    return tokens;
   }
 
   async forgetPassword(forgetPassWordDto: ForgetPassWordDto) {
@@ -112,14 +148,25 @@ export class UserService {
     return Promise.resolve(undefined);
   }
 
-  async refreshToken(user) {
-    return Promise.resolve(undefined);
-  }
-
   async findUserByEmail(email: string) {
     return await this.userRepository.createQueryBuilder('user')
       .leftJoinAndSelect('user.verificationCodes', 'verificationCodes')
       .where('user.email = :email', { email: email })
+      .getOne();
+  }
+
+  async findUserByEmailOrPhone(email: string, phone: string) {
+    return await this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.verificationCodes', 'verificationCodes')
+      .where('user.email = :email', { email: email })
+      .orWhere('user.phone = :phone', { phone: phone })
+      .getOne();
+  }
+
+  async findUserByPhone(phone: string) {
+    return await this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.verificationCodes', 'verificationCodes')
+      .where('user.phone = :phone', { phone: phone })
       .getOne();
   }
 

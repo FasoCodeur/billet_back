@@ -1,9 +1,10 @@
-import { Body, Controller, HttpStatus, Param, Patch, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpStatus, Param, Patch, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginUserDto } from '../user/dto/login.user.dto';
 import { ForgetPassWordDto } from '../user/dto/forgetPassWord.dto';
+import { Response } from 'express'
 
 @Controller('auth')
 @ApiTags('auth')
@@ -16,26 +17,36 @@ export class AuthController {
   }
   // @Public()
   @Post("/login")
-  async login(@Body() createAuthDto: LoginUserDto) {
-    return await this.authService.login(createAuthDto);
+  async login(@Body() createAuthDto: LoginUserDto, @Res({passthrough:true}) response:Response) {
+    const tokens = await this.authService.login(createAuthDto, response);
+    response.cookie('access_token', tokens.access_token, { httpOnly: true });
+    response.cookie('refresh_token', tokens.refresh_token, { httpOnly: true });
+    return tokens;
   }
 
   // @Public()
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
-    // response.clearCookie('access_token');
-    // response.clearCookie('refresh_token');
-    // return {
-    //   status: HttpStatus.OK,
-    //   message: "Successfully logged out"
-    // }
+    response.clearCookie('access_token');
+    response.clearCookie('refresh_token');
+    return {
+      status: HttpStatus.OK,
+      message: "Successfully logged out"
+    }
   }
 
   @Post('refresh')
   @ApiBearerAuth()
-  async refresh(@Req() req) {
+  async refresh(@Req() req, @Res({ passthrough: true }) response: Response) {
     const [type, token] = req.headers['authorization']?.split(' ') || [];
-    return await this.authService.refresh(token);
+    if (type ==='Bearer'){
+      const newAccessToken = await this.authService.refresh(token, response);
+      response.cookie('access_token', newAccessToken, { httpOnly: true });
+      response.cookie('refresh_token', newAccessToken.refresh_token, { httpOnly: true });
+      return newAccessToken;
+    }else {
+      throw new BadRequestException('Ce token est incorrecte.');
+    }
   }
 
   // @Public()

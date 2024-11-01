@@ -1,15 +1,16 @@
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { AbstractEntity } from '../../user/entities/abstract.entity';
 import { Address } from './address.entity';
 import { User } from '../../user/entities/user.entity';
+import { Bus } from '../../bus/entities/bus.entity';
 
 @Entity()
 export class Company extends AbstractEntity {
 
-  @Column()
+  @Column({unique: true})
   name: string;
 
-  @Column()
+  @Column({nullable: true})
   logo: string;
 
   @OneToOne(
@@ -20,4 +21,7 @@ export class Company extends AbstractEntity {
 
   @ManyToOne(()=>User, (user) => user.company)
   user: User;
+
+  @OneToMany(()=>Bus, (bus) => bus.company)
+  bus: Bus[]
 }

@@ -1,5 +1,4 @@
 export function generateRandomNumber() {
-  // console.log('getting phone random');
   return Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
 }
 
@@ -10,7 +9,6 @@ export function generateExpiryTime(): Date {
 }
 
 export function isExpired(date: Date): boolean {
-  // console.log(date);
   const currentDate = new Date();
   return date < currentDate;
 }

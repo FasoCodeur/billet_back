@@ -7,8 +7,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CompanyModule } from './company/company.module';
-import { TicketModule } from './ticket/ticket.module';
 import { PaymentModule } from './payment/payment.module';
+import { EmailService } from './email/email.service';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { TrajetModule } from './trajet/trajet.module';
+import { BusModule } from './bus/bus.module';
+import { ReservationModule } from './reservation/reservation.module';
+import { EquipmentModule } from './equipment/equipment.module';
 
 @Module({
   imports: [
@@ -17,10 +24,19 @@ import { PaymentModule } from './payment/payment.module';
     AuthModule,
     UserModule,
     CompanyModule,
-    TicketModule,
     PaymentModule,
+    TrajetModule,
+    BusModule,
+    ReservationModule,
+    EquipmentModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, EmailService,
+    JwtService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    }
+  ],
 })
 export class AppModule {}

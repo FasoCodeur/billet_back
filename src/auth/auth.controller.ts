@@ -5,16 +5,21 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginUserDto } from '../user/dto/login.user.dto';
 import { ForgetPassWordDto } from '../user/dto/forgetPassWord.dto';
 import { Response } from 'express'
+import { Public } from './decorator/roles.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) {}
 
+  @Public()
   @Post("/register")
   async register(@Body() createAuthDto: CreateUserDto) {
     return await this.authService.create(createAuthDto);
   }
+  @Public()
   @Post("/login")
   async login(@Body() createAuthDto: LoginUserDto, @Res({passthrough:true}) response:Response) {
     const tokens = await this.authService.login(createAuthDto, response);
@@ -33,6 +38,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Post('refresh')
   @ApiBearerAuth()
   async refresh(@Req() req, @Res({ passthrough: true }) response: Response) {

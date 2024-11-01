@@ -19,8 +19,7 @@ export class RefreshGuard implements  CanActivate{
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    console.log(request);
-    console.log(token);
+
     if (!token) {
       throw new UnauthorizedException("Veuillez vous connecter pour accéder aux ressources.");
     }

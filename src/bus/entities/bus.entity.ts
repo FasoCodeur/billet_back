@@ -3,6 +3,7 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Company } from '../../company/entities/company.entity';
 import { Trajet } from '../../trajet/entities/trajet.entity';
 import { Equipment } from '../../equipment/entities/equipment.entity';
+import { Seat } from '../../seat/entities/seat.entity';
 
 @Entity()
 export class Bus extends AbstractEntity {
@@ -24,4 +25,7 @@ export class Bus extends AbstractEntity {
 
   @OneToMany(()=>Equipment, (equipment) => equipment.bus)
   equipment: Equipment[]
+
+  @ManyToOne(()=>Seat, (seat) => seat.bus)
+  sieges: Seat;
 }

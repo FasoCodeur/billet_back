@@ -16,6 +16,7 @@ import { TrajetModule } from './trajet/trajet.module';
 import { BusModule } from './bus/bus.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { EquipmentModule } from './equipment/equipment.module';
+import { SeatModule } from './seat/seat.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EquipmentModule } from './equipment/equipment.module';
     BusModule,
     ReservationModule,
     EquipmentModule,
+    SeatModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailService,

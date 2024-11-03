@@ -32,7 +32,6 @@ export class BusService {
   }
 
   async findAll(params:PaginateRequest) {
-    console.log(params.matricule, params.limit, params.page);
     const pagination: PaginateRequest = {
       page: Number(params.page) || 1,
       limit: Number(params.limit) || 10,

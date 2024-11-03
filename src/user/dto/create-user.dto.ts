@@ -1,7 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsPhoneNumber, Matches } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, Matches } from 'class-validator';
 
 export class CreateUserDto {
+  @ApiProperty({default: 'Toure'})
+  @IsNotEmpty()
+  firstName: string
+
+  @ApiProperty({default: 'Aboubacar'})
+  @IsNotEmpty()
+  lastName: string
+
   @IsEmail({}, {message:'INVALID_EMAIL_FORMAT'})
   @ApiProperty()
   readonly email: string;
@@ -9,6 +17,10 @@ export class CreateUserDto {
   @IsPhoneNumber('ML',{message:'INVALID_PHONE_NUMBER'})
   @ApiProperty()
   phone: string;
+
+  @ApiPropertyOptional({default: 'Mali'})
+  @IsOptional()
+  country: string
 
   @ApiProperty({required: true})
   @IsNotEmpty()

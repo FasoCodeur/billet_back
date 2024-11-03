@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, OneToMany, OneToOne } from 'typeorm';
 import { AbstractEntity } from './abstract.entity';
 import { VerifyCodesEntity } from './verify-codes.entity';
 import { UserRole } from './user-role.enum';
@@ -6,6 +6,12 @@ import { Company } from '../../company/entities/company.entity';
 
 @Entity()
 export class User extends AbstractEntity {
+
+  @Column()
+  firstName:string;
+
+  @Column()
+  lastName:string;
 
   @Column({ unique: true, nullable: true })
   email: string;
@@ -18,6 +24,9 @@ export class User extends AbstractEntity {
 
   @Column({ default: true })
   isActif: boolean;
+
+  @Column()
+  country:string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.VENDOR })
   role:UserRole[];
@@ -33,4 +42,7 @@ export class User extends AbstractEntity {
 
   @OneToMany(()=>Company, (company) => company.user)
   company: Company[];
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
 }

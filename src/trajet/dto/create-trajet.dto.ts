@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { format } from 'date-fns';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateTrajetDto {
 
@@ -11,13 +13,17 @@ export class CreateTrajetDto {
   @IsNotEmpty()
   arrivalPoint:string;
 
-  @ApiProperty({default: '01/01/2024 22h:30'})
+  @ApiProperty({ default: '2024-01-01T22:30' })
   @IsNotEmpty()
-  departureDate:string;
+  @Type(() => Date)
+  @Transform(({ value }) => format(new Date(value), "yyyy-MM-dd'T'HH:mm"))
+  departureDate:Date;
 
-  @ApiProperty({default: '02/01/2024 07h:30'})
+  @ApiProperty({ default: '2024-01-02T07:30' })
   @IsNotEmpty()
-  arrivalDate:string
+  @Type(() => Date)
+  @Transform(({ value }) => format(new Date(value), "yyyy-MM-dd'T'HH:mm"))
+  arrivalDate:Date
 
   @ApiProperty({default: 2000})
   @IsNotEmpty()
@@ -25,6 +31,7 @@ export class CreateTrajetDto {
 
   @ApiProperty({default: 25})
   @IsNotEmpty()
+  @IsNumber()
   numberofplacesonsale:number;
 
   @ApiProperty({default: 'cc3104dc-75ae-4f64-a185-0b55952f3da9'})
@@ -34,7 +41,5 @@ export class CreateTrajetDto {
   @ApiPropertyOptional({default: 'cc3104dc-75ae-4f64-a185-0b55952f3da9'})
   @IsOptional()
   busUid:string;
-
-
 
 }

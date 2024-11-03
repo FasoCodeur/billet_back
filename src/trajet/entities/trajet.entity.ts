@@ -12,17 +12,19 @@ export class Trajet extends AbstractEntity {
   arrivalPoint:string;
 
   @Column({name : 'departure_date'})
-  departureDate:string;
+  departureDate:Date;
 
   @Column({name : 'arrival_date'})
-  arrivalDate:string
-
+  arrivalDate:Date;
 
   @Column('decimal', { scale: 2 })
   price: number;
 
   @Column()
   numberofplacesonsale:number;
+
+  @Column({default: true})
+  active:boolean
 
   @Column()
   companyUuid: string;

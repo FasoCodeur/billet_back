@@ -44,18 +44,29 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    return await this.userRepository.createQueryBuilder('user')
+    const user = await this.userRepository.createQueryBuilder('user')
       .leftJoinAndSelect('user.verificationCodes', 'verificationCodes')
       .where('user.id = :id', { id: id })
       .getOne();
+    if (!user)
+      throw new NotFoundException('user not found.');
+    return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const { firstName, lastName, email, password, phone, country } = updateUserDto;
+    const oldUser = await this.findOne(id);
+    oldUser.firstName = firstName;
+    oldUser.lastName = lastName;
+    oldUser.email = email;
+    oldUser.phone = phone;
+    oldUser.country = country;
+    oldUser.password = await bcrypt.hash(password, 12);
+      return await this.userRepository.save(oldUser);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    return await this.userRepository.softRemove(await this.findOne(id));
   }
 
   async login(loginUserDto: LoginUserDto,response) {

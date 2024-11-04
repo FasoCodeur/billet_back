@@ -1,4 +1,7 @@
-export enum TypeRequest {
+export enum StatusPayment {
+  PENDING ='pending',
+  CONFIRMED ='confirmed',
+  CANCELED ='canceled'
 }
 
 export enum StatusReservation {

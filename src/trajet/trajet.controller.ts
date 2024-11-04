@@ -4,6 +4,7 @@ import { CreateTrajetDto } from './dto/create-trajet.dto';
 import { UpdateTrajetDto } from './dto/update-trajet.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PaginateRoute } from './dto/paginate.dto';
+import { Public } from '../auth/decorator/roles.decorator';
 
 @ApiTags('Trajet')
 @Controller('trajet')
@@ -16,6 +17,7 @@ export class TrajetController {
     return this.trajetService.create(createTrajetDto);
   }
 
+  @Public()
   @Get()
   async findAll(@Query() params: PaginateRoute) {
     const [routes, total, totalPages, currentPage] = await this.trajetService.findAll(params);

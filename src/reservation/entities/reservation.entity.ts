@@ -1,7 +1,8 @@
 import { AbstractEntity } from '../../user/entities/abstract.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
 import { StatusReservation } from '../../enums/enums';
 import { Seat } from '../../seat/entities/seat.entity';
+import { Payment } from '../../payment/entities/payment.entity';
 
 @Entity()
 export class Reservation extends AbstractEntity {
@@ -22,4 +23,7 @@ export class Reservation extends AbstractEntity {
 
   @ManyToOne(() => Seat, (siege) => siege.reservations)
   siege: Seat;
+
+  @OneToOne(() => Payment, payment => payment.reservation)
+  payment: Payment;
 }

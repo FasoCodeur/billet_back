@@ -28,7 +28,7 @@ export class TrajetController {
       total_results: total,
     };
   }
-
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.trajetService.findOne(id);

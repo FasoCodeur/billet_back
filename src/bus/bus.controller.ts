@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { BusService } from './bus.service';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
@@ -18,7 +28,8 @@ export class BusController {
 
   @Get()
   async findAll(@Query() params: PaginateRequest) {
-    const [bus, total, totalPages, currentPage] = await this.busService.findAll(params);
+    const [bus, total, totalPages, currentPage] =
+      await this.busService.findAll(params);
     return {
       bus,
       current_page: currentPage,
@@ -33,12 +44,15 @@ export class BusController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateBusDto: UpdateBusDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateBusDto: UpdateBusDto,
+  ) {
     return this.busService.update(id, updateBusDto);
   }
 
   @Delete(':id')
-  remove(@Param('id',ParseUUIDPipe) id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.busService.remove(id);
   }
 }

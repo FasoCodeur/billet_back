@@ -7,7 +7,7 @@ import { Reservation } from '../../reservation/entities/reservation.entity';
 export class Seat extends AbstractEntity {
 
   @Column()
-  number: string;
+  number: number;
 
   @ManyToOne(() => Bus, (bus) => bus.sieges)
   bus: Bus;

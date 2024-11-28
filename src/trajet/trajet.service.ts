@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrajetDto } from './dto/create-trajet.dto';
 import { UpdateTrajetDto } from './dto/update-trajet.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,20 +19,24 @@ export class TrajetService {
     private readonly busService: BusService,
     private readonly companyService: CompanyService,
     @InjectRepository(Trajet)
-    private readonly trajectRepository:Repository<Trajet>
+    private readonly trajectRepository: Repository<Trajet>,
   ) {}
 
   async create(createTrajetDto: CreateTrajetDto) {
-
     //Verify if same company route exist
     if (await this.verifyIfRouteExist(createTrajetDto))
-      throw new HttpException('This route is already exists',HttpStatus.CONFLICT);
+      throw new HttpException(
+        'This route is already exists',
+        HttpStatus.CONFLICT,
+      );
 
     //create a new trajet
     const createTrajet = await this.trajectRepository.create(createTrajetDto);
 
     //verify if company exist in db
-    const company = await this.companyService.findOne(createTrajetDto.companyUuid);
+    const company = await this.companyService.findOne(
+      createTrajetDto.companyUuid,
+    );
 
     //assign company to traject
     createTrajet.companyUuid = company.id.toString();
@@ -41,19 +50,25 @@ export class TrajetService {
   }
 
   async findAll(params: PaginateRoute) {
-    const { page, limit, startingPoint, arrivalPoint, numberofplacesonsale, maxPrice } = params;
+    const {
+      page,
+      limit,
+      startingPoint,
+      arrivalPoint,
+      numberofplacesonsale,
+      maxPrice,
+    } = params;
     const pagination: PaginateRoute = {
       maxPrice: 0,
       page: Number(page) || 1,
-      limit: Number(limit) || 10
+      limit: Number(limit) || 10,
     };
     const skip = (pagination.page - 1) * pagination.limit;
-    let query = await this.trajectRepository.createQueryBuilder('trajet')
+    let query = await this.trajectRepository
+      .createQueryBuilder('trajet')
       .leftJoinAndSelect('trajet.bus', 'bus')
       .leftJoinAndSelect('bus.company', 'company')
-      .where('trajet.active = :active', {active: true })
-
-
+      .where('trajet.active = :active', { active: true });
 
     // Filtrer par points de départ et d'arrivée
     if (startingPoint) {
@@ -70,13 +85,14 @@ export class TrajetService {
 
     //filter by number of seat
     if (numberofplacesonsale)
-      query = query
-        .andWhere('trajet.numberofplacesonsale >= :numberofplacesonsale', { numberofplacesonsale });
+      query = query.andWhere(
+        'trajet.numberofplacesonsale >= :numberofplacesonsale',
+        { numberofplacesonsale },
+      );
 
     //filter by budget
     if (maxPrice)
-      query = query
-        .andWhere('trajet.price <= :maxPrice', { maxPrice });
+      query = query.andWhere('trajet.price <= :maxPrice', { maxPrice });
 
     // Filtrer par date de départ
     // if (departureDate) {
@@ -85,16 +101,16 @@ export class TrajetService {
     //   });
     // }
 
-// Filtrer par plage horaire de départ
-//     if (timeRange) {
-//       if (timeRange === 'morning') {
-//         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 0 AND 11');
-//       } else if (timeRange === 'afternoon') {
-//         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 12 AND 16');
-//       } else if (timeRange === 'evening') {
-//         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 17 AND 23');
-//       }
-//     }
+    // Filtrer par plage horaire de départ
+    //     if (timeRange) {
+    //       if (timeRange === 'morning') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 0 AND 11');
+    //       } else if (timeRange === 'afternoon') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 12 AND 16');
+    //       } else if (timeRange === 'evening') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 17 AND 23');
+    //       }
+    //     }
 
     // Filtrer par équipement
     // if (equipment) {
@@ -104,30 +120,39 @@ export class TrajetService {
     // }
 
     const [routes, total] = await query
-      .orderBy("company.name", "DESC")
+      .orderBy('company.name', 'DESC')
       .skip(skip)
       .take(pagination.limit)
       .getManyAndCount();
 
-    const totalPages = Math.ceil(total  / pagination.limit);
-    return [routes, total , totalPages, pagination.page];
+    const totalPages = Math.ceil(total / pagination.limit);
+    return [routes, total, totalPages, pagination.page];
   }
 
   async findOne(id: string) {
-    const trajet = await this.trajectRepository.createQueryBuilder('trajet')
+    const trajet = await this.trajectRepository
+      .createQueryBuilder('trajet')
       .where('trajet.id = :id', { id: id })
       .leftJoinAndSelect('trajet.bus', 'bus')
       .leftJoinAndSelect('bus.company', 'company')
       .getOne();
 
-    if (!trajet)
-      throw new NotFoundException('Trajet not found.');
+    if (!trajet) throw new NotFoundException('Trajet not found.');
 
     return trajet;
   }
 
   async update(id: string, updateTrajetDto: UpdateTrajetDto) {
-    const {arrivalPoint, arrivalDate,departureDate,startingPoint,numberofplacesonsale,companyUuid,price,busUid} = updateTrajetDto;
+    const {
+      arrivalPoint,
+      arrivalDate,
+      departureDate,
+      startingPoint,
+      numberofplacesonsale,
+      companyUuid,
+      price,
+      busUid,
+    } = updateTrajetDto;
 
     //Verify if route exist
     const trajet = await this.findOne(id);
@@ -139,7 +164,7 @@ export class TrajetService {
     }
 
     //Verify if bus uuid is define
-    if(updateTrajetDto.busUid)
+    if (updateTrajetDto.busUid)
       trajet.bus = await this.busService.findOne(busUid);
 
     //Mapping old to new traject
@@ -147,7 +172,7 @@ export class TrajetService {
     trajet.arrivalDate = arrivalDate;
     trajet.startingPoint = startingPoint;
     trajet.arrivalPoint = arrivalPoint;
-    trajet.numberofplacesonsale = numberofplacesonsale
+    trajet.numberofplacesonsale = numberofplacesonsale;
     trajet.price = price;
 
     //save the new traject
@@ -166,27 +191,27 @@ export class TrajetService {
       departureDate,
       startingPoint,
       numberofplacesonsale,
-      price
+      price,
     } = createTrajetDto;
     const searchParams = {
-      busId:busUid,
+      busId: busUid,
       companyUuid,
       arrivalPoint,
       departureDate,
       arrivalDate,
       startingPoint,
       numberofplacesonsale,
-      price
+      price,
     };
 
     return await this.trajectRepository
       .createQueryBuilder('trajet')
       .where(
-        "trajet.busId = :busId AND trajet.companyUuid = :companyUuid " +
-        "AND trajet.arrivalPoint = :arrivalPoint AND trajet.departureDate = :departureDate " +
-        "AND trajet.arrivalDate = :arrivalDate AND trajet.startingPoint = :startingPoint " +
-        "AND trajet.numberofplacesonsale = :numberofplacesonsale AND trajet.price = :price",
-        searchParams
+        'trajet.busId = :busId AND trajet.companyUuid = :companyUuid ' +
+          'AND trajet.arrivalPoint = :arrivalPoint AND trajet.departureDate = :departureDate ' +
+          'AND trajet.arrivalDate = :arrivalDate AND trajet.startingPoint = :startingPoint ' +
+          'AND trajet.numberofplacesonsale = :numberofplacesonsale AND trajet.price = :price',
+        searchParams,
       )
       .getOne();
   }
@@ -202,8 +227,9 @@ export class TrajetService {
 
     // Retourner un message indiquant le nouvel état de la route
     return {
-      message:route.active ? 'Route has been activated.' : 'Route has been deactivated.',
+      message: route.active
+        ? 'Route has been activated.'
+        : 'Route has been deactivated.',
     };
-
   }
 }

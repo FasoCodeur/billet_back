@@ -1,14 +1,34 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateCompanyDto {
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'company ice',
+    default: '6523923459875',
+  })
+  ice: string;
 
   @IsNotEmpty()
   @ApiProperty({
-    description:'company name',
-    default:'Bybus company'
+    description: 'company name',
+    default: 'Bybus company',
   })
   name: string;
+
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'company email',
+    default: 'company@gmail.com',
+  })
+  email: string;
+
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'company phone number',
+    default: '+22377245689',
+  })
+  phone: string;
 
   // @IsNotEmpty()
   // @ApiProperty()
@@ -16,23 +36,7 @@ export class CreateCompanyDto {
 
   @IsNotEmpty()
   @ApiProperty({
-    default:'Bamako'
+    default: 'Bamako',
   })
-  // @IsString()
-   city: string;
-
-  @ApiPropertyOptional({
-    default:39.0
-  })
-  @IsOptional()
-  @IsNumber()
-  log:number
-
-
-  @ApiPropertyOptional({
-    default:49.0
-  })
-  @IsOptional()
-  lat:number
-
+  city: string;
 }

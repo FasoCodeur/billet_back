@@ -3,8 +3,7 @@ import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as process from 'node:process';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
-
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,7 +17,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document,{
+  SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
       requestInterceptor: (req) => {
         req.credentials = 'include';
@@ -27,11 +26,10 @@ async function bootstrap() {
     },
   });
 
-
   app.use(helmet());
   app.enableCors({
-    origin:process.env.CORS.split(','),
-    credentials:true,
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
   });
   app.useGlobalPipes(
     new ValidationPipe({
@@ -40,8 +38,6 @@ async function bootstrap() {
     }),
   );
   await app.listen(process.env.PORT);
-  console.log(
-    `Pour la connection a swagger:http://localhost:${PORT}/api`,
-  );
+  console.log(`Pour la connection a swagger:http://localhost:${PORT}/api`);
 }
 bootstrap();

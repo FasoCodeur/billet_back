@@ -14,6 +14,7 @@ import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PaginateRequest } from './dto/paginate.dto';
+import { PaginateByCompanyIdDto } from './dto/paginateByCompanyId.dto';
 
 @ApiTags('CompanyBus')
 @Controller('bus')
@@ -54,5 +55,16 @@ export class BusController {
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.busService.remove(id);
+  }
+  @Get('get_bus/by_company_id')
+  async findAllByCompanyId(@Query() params: PaginateByCompanyIdDto) {
+    const [bus, total, totalPages, currentPage] =
+      await this.busService.findAllByCompanyId(params);
+    return {
+      bus,
+      current_page: currentPage,
+      total_pages: totalPages,
+      total_results: total,
+    };
   }
 }

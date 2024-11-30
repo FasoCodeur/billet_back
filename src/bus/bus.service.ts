@@ -10,6 +10,7 @@ import { Bus } from './entities/bus.entity';
 import { Repository } from 'typeorm';
 import { CompanyService } from '../company/company.service';
 import { PaginateRequest } from './dto/paginate.dto';
+import { PaginateByCompanyIdDto } from './dto/paginateByCompanyId.dto';
 
 @Injectable()
 export class BusService {
@@ -39,6 +40,8 @@ export class BusService {
 
   async findAll(params: PaginateRequest) {
     const pagination: PaginateRequest = {
+      company_id: '',
+      matricule: '',
       page: Number(params.page) || 1,
       limit: Number(params.limit) || 10,
     };
@@ -95,5 +98,33 @@ export class BusService {
         matriculation: matricule,
       })
       .getOne();
+  }
+
+  async findAllByCompanyId(params: PaginateByCompanyIdDto) {
+    const { company_id, page, matricule, limit } = params;
+    const pagination: PaginateByCompanyIdDto = {
+      page: Number(page) || 1,
+      company_id: '',
+      matricule: '',
+      limit: Number(limit) || 10,
+    };
+    const skip = (pagination.page - 1) * pagination.limit;
+    let query = await this.busRepository
+      .createQueryBuilder('bus')
+      .where('bus.companyId = :companyId', {
+        companyId: company_id,
+      });
+
+    if (params.matricule) {
+      query = query.andWhere('bus.matriculation ILIKE :matriculation', {
+        matriculation: `%${matricule}%`,
+      });
+    }
+    const [bus, total] = await query
+      .skip(skip)
+      .take(pagination.limit)
+      .getManyAndCount();
+    const totalPages = Math.ceil(total / pagination.limit);
+    return [bus, total, totalPages, pagination.page];
   }
 }

@@ -59,6 +59,7 @@ export class CompanyService {
     const [companies, total] = await query
       .skip(skip)
       .take(pagination.limit)
+      .orderBy({ 'company.createdAt': 'DESC' })
       .getManyAndCount();
 
     const totalPages = Math.ceil(total / limit);

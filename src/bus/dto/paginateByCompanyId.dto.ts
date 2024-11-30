@@ -1,8 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
-export class PaginateRequest {
-  @ApiProperty({ description: 'Page number', example: 1, required: true })
+export class PaginateByCompanyIdDto {
+  @ApiProperty({
+    description: 'Page number',
+    example: 1,
+    required: true,
+  })
   @IsNotEmpty()
   page?: number;
 
@@ -14,6 +18,14 @@ export class PaginateRequest {
   @IsNotEmpty()
   limit?: number;
 
+  @ApiProperty({
+    description: 'le status de la request',
+    example: '0b1cdbb6-2a9f-44be-8197-f490fb8e3de0',
+    required: true,
+  })
+  @IsUUID()
+  company_id: string;
+
   @ApiPropertyOptional({
     description: 'le status de la request',
     example: '3445AA',
@@ -21,6 +33,4 @@ export class PaginateRequest {
   })
   @IsOptional()
   matricule?: string;
-
-  company_id: string;
 }

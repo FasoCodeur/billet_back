@@ -1,32 +1,38 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  Matches,
+} from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty({default: 'Toure'})
+  @ApiProperty({ default: 'Toure' })
   @IsNotEmpty()
-  firstName: string
+  firstName: string;
 
-  @ApiProperty({default: 'Aboubacar'})
+  @ApiProperty({ default: 'Aboubacar' })
   @IsNotEmpty()
-  lastName: string
+  lastName: string;
 
-  @IsEmail({}, {message:'INVALID_EMAIL_FORMAT'})
+  @IsEmail({}, { message: 'INVALID_EMAIL_FORMAT' })
   @ApiProperty()
   readonly email: string;
 
-  @IsPhoneNumber('ML',{message:'INVALID_PHONE_NUMBER'})
+  @IsPhoneNumber('ML', { message: 'INVALID_PHONE_NUMBER' })
   @ApiProperty()
   phone: string;
 
-  @ApiPropertyOptional({default: 'Mali'})
+  @ApiPropertyOptional({ default: 'Mali' })
   @IsOptional()
-  country: string
+  country: string;
 
-  @ApiProperty({required: true})
+  @ApiProperty({ required: true })
   @IsNotEmpty()
   @Matches(/^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[a-zA-Z\d]).{8,}$/, {
-    message: 'Password must be at least 8 characters long, contain at least one uppercase letter and one special character',
+    message:
+      'Password must be at least 8 characters long, contain at least one uppercase letter and one special character',
   })
   password: string;
-
 }

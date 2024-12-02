@@ -31,7 +31,7 @@ export class User extends AbstractEntity {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.VENDOR })
   role:UserRole[];
 
-  @Column({ default: false })
+  @Column({ default: true })
   is_email_verified: boolean;
 
   @OneToOne(

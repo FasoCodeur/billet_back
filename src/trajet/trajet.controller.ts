@@ -1,10 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import { TrajetService } from './trajet.service';
 import { CreateTrajetDto } from './dto/create-trajet.dto';
 import { UpdateTrajetDto } from './dto/update-trajet.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaginateRoute } from './dto/paginate.dto';
 import { Public } from '../auth/decorator/roles.decorator';
+import { PaginateAdminDto } from './dto/PaginateAdmin.Dto';
 
 @ApiTags('Trajet')
 @Controller('trajet')
@@ -17,10 +28,12 @@ export class TrajetController {
     return this.trajetService.create(createTrajetDto);
   }
 
+  @ApiOperation({ summary: 'For mobile app link public' })
   @Public()
   @Get()
   async findAll(@Query() params: PaginateRoute) {
-    const [routes, total, totalPages, currentPage] = await this.trajetService.findAll(params);
+    const [routes, total, totalPages, currentPage] =
+      await this.trajetService.findAll(params);
     return {
       routes,
       current_page: currentPage,
@@ -47,5 +60,18 @@ export class TrajetController {
   @Patch('deactivateOrActivate/:id')
   deactivateRoute(@Param('id', ParseUUIDPipe) id: string) {
     return this.trajetService.deactivateRoute(id);
+  }
+
+  @Public()
+  @Get('/get_all/trajets')
+  async get_all_trajets(@Query() params: PaginateAdminDto) {
+    const [routes, total, totalPages, currentPage] =
+      await this.trajetService.get_all_trajets(params);
+    return {
+      routes,
+      current_page: currentPage,
+      total_pages: totalPages,
+      total_results: total,
+    };
   }
 }

@@ -12,6 +12,7 @@ import { Trajet } from './entities/trajet.entity';
 import { CompanyService } from '../company/company.service';
 import { BusService } from '../bus/bus.service';
 import { PaginateRoute } from './dto/paginate.dto';
+import { PaginateAdminDto } from './dto/PaginateAdmin.Dto';
 
 @Injectable()
 export class TrajetService {
@@ -68,7 +69,7 @@ export class TrajetService {
       .createQueryBuilder('trajet')
       .leftJoinAndSelect('trajet.bus', 'bus')
       .leftJoinAndSelect('bus.company', 'company')
-      .where('trajet.active = :active', { active: true });
+      .where('trajet.isActive = :isActive', { isActive: true });
 
     // Filtrer par points de départ et d'arrivée
     if (startingPoint) {
@@ -220,16 +221,104 @@ export class TrajetService {
     const route = await this.findOne(id);
 
     // Inverser l'état de la route
-    route.active = !route.active;
+    route.isActive = !route.isActive;
 
     // Sauvegarder les modifications dans la base de données
     await this.trajectRepository.save(route);
 
     // Retourner un message indiquant le nouvel état de la route
     return {
-      message: route.active
+      message: route.isActive
         ? 'Route has been activated.'
         : 'Route has been deactivated.',
     };
+  }
+
+  async get_all_trajets(params: PaginateAdminDto) {
+    const {
+      page,
+      limit,
+      startingPoint,
+      arrivalPoint,
+      numberofplacesonsale,
+      price,
+      companyName,
+    } = params;
+    const pagination: PaginateRoute = {
+      maxPrice: 0,
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+    };
+    const skip = (pagination.page - 1) * pagination.limit;
+    let query = await this.trajectRepository
+      .createQueryBuilder('trajet')
+      .leftJoinAndSelect('trajet.bus', 'bus')
+      .leftJoinAndSelect('bus.company', 'company')
+      .where('trajet.isActive = :isActive', { isActive: true });
+
+    // Filtrer par points de départ et d'arrivée
+    if (startingPoint) {
+      query = query.andWhere('trajet.startingPoint ILIKE :startingPoint', {
+        startingPoint: `%${startingPoint}%`,
+      });
+    }
+
+    if (arrivalPoint) {
+      query = query.andWhere('trajet.arrivalPoint ILIKE :arrivalPoint', {
+        arrivalPoint: `%${arrivalPoint}%`,
+      });
+    }
+
+    //filter by number of seat
+    if (numberofplacesonsale)
+      query = query.andWhere(
+        'trajet.numberofplacesonsale >= :numberofplacesonsale',
+        { numberofplacesonsale },
+      );
+
+    //filter by budget
+    if (price) {
+      query = query.andWhere('trajet.price = :maxPrice', { price });
+    }
+
+    if (companyName) {
+      query = query.andWhere('company.name ILIKE :name', {
+        name: companyName,
+      });
+    }
+
+    // Filtrer par date de départ
+    // if (departureDate) {
+    //   query = query.andWhere('trajet.departureDate = :departureDate', {
+    //     departureDate,
+    //   });
+    // }
+
+    // Filtrer par plage horaire de départ
+    //     if (timeRange) {
+    //       if (timeRange === 'morning') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 0 AND 11');
+    //       } else if (timeRange === 'afternoon') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 12 AND 16');
+    //       } else if (timeRange === 'evening') {
+    //         query = query.andWhere('EXTRACT(HOUR FROM trajet.departureDate) BETWEEN 17 AND 23');
+    //       }
+    //     }
+
+    // Filtrer par équipement
+    // if (equipment) {
+    //   query = query.andWhere('trajet.equipment ILIKE :equipment', {
+    //     equipment: `%${equipment}%`,
+    //   });
+    // }
+
+    const [routes, total] = await query
+      .orderBy('company.name', 'DESC')
+      .skip(skip)
+      .take(pagination.limit)
+      .getManyAndCount();
+
+    const totalPages = Math.ceil(total / pagination.limit);
+    return [routes, total, totalPages, pagination.page];
   }
 }
